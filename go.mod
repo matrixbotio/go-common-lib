@@ -1,4 +1,4 @@
-module go-common-lib
+module github.com/matrixbotio/go-common-lib
 
 go 1.17
 
