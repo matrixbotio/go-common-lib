@@ -9,20 +9,20 @@ import (
 )
 
 type esLogger struct {
-	esProto  string
-	esHost   string
-	esPort   string
-	esIndex  string
-	esClient *elasticsearch.Client
+	proto  string
+	host   string
+	port   string
+	index  string
+	client *elasticsearch.Client
 }
 
 func InitLogger(sourceName string, logLevel string, esProto string, esHost string, esPort string,
 	esIndex string) (*constants.Logger, error) {
 	esLogger := esLogger{
-		esProto: esProto,
-		esHost:  esHost,
-		esPort:  esPort,
-		esIndex: esIndex,
+		proto: esProto,
+		host:  esHost,
+		port:  esPort,
+		index: esIndex,
 	}
 
 	hostName, err := os.Hostname()
@@ -44,14 +44,14 @@ func InitLogger(sourceName string, logLevel string, esProto string, esHost strin
 }
 
 func (l *esLogger) Send(data string) {
-	if l.esClient == nil {
+	if l.client == nil {
 		return
 	}
 
-	_, err := l.esClient.Index(
-		l.esIndex,
+	_, err := l.client.Index(
+		l.index,
 		strings.NewReader(data),
-		l.esClient.Index.WithRefresh("true"),
+		l.client.Index.WithRefresh("true"),
 	)
 	if err != nil {
 		log.Println("failed to send log to ES: " + err.Error())
@@ -59,7 +59,7 @@ func (l *esLogger) Send(data string) {
 }
 
 func (l *esLogger) initEs(logger *constants.Logger) error {
-	if l.esProto == "" {
+	if l.proto == "" {
 		logger.Log("ElasticSearch protocol is not passed, initialising logger without ElasticSearch")
 		return nil
 	}
@@ -67,10 +67,10 @@ func (l *esLogger) initEs(logger *constants.Logger) error {
 	var err error
 	esConfig := elasticsearch.Config{
 		Addresses: []string{
-			l.esProto + "://" + l.esHost + ":" + l.esPort,
+			l.proto + "://" + l.host + ":" + l.port,
 		},
 	}
-	l.esClient, err = elasticsearch.NewClient(esConfig)
+	l.client, err = elasticsearch.NewClient(esConfig)
 	if err != nil {
 		return err
 	}
