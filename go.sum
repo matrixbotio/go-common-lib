@@ -1,0 +1,6 @@
+github.com/elastic/go-elasticsearch/v7 v7.13.1 h1:PaM3V69wPlnwR+ne50rSKKn0RNDYnnOFQcuGEI0ce80=
+github.com/elastic/go-elasticsearch/v7 v7.13.1/go.mod h1:OJ4wdbtDNk5g503kvlHLyErCgQwwzmDtaFC4XyOxXA4=
+github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
+github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
+github.com/matrixbotio/constants-lib v1.0.87 h1:zTGCEsaGm0tK3e3rGre91AR7JgW0YsntzsJm5ylrdYI=
+github.com/matrixbotio/constants-lib v1.0.87/go.mod h1:ol7WN7tisKCBoLOObf9/8vmnv3cBZC9oFL4Jv59YnwQ=
