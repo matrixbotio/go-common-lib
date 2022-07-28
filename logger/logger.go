@@ -2,11 +2,9 @@ package logger
 
 import (
 	"encoding/json"
-	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/matrixbotio/constants-lib"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -14,120 +12,98 @@ import (
 )
 
 var wg sync.WaitGroup
-var logConfig = getLogs("https://config.matrixbot.io/public/log-levels.json")
-
-func InitESLogger(sourceName string, logLevel string, esProto string, esHost string, esPort string,
-	esIndex string) (*Logger, error) {
-	esLogger := esLogger{
-		proto: esProto,
-		host:  esHost,
-		port:  esPort,
-		index: esIndex,
-	}
-
-	hostName, err := os.Hostname()
-	if err != nil {
-		return nil, err
-	}
-
-	logger, err := NewLogger(&esLogger, hostName, sourceName, logLevel), nil
-	if err != nil {
-		return nil, err
-	}
-
-	err = esLogger.initEs(logger)
-	if err != nil {
-		return nil, err
-	}
-
-	return logger, nil
-}
+var logConfig = getLogConfig(logConfigUrl)
 
 func NewLogger(dev interface{}, host string, source string, lowestLevelName ...string) *Logger {
-	format, formatLen := getSuitableDatetimeFormat(logConfig["datetime_format"].(string))
-	logLevels := make(map[string]*logLevelDesc)
-	lowestLevel := 2
-	if levelsSection, ok := logConfig["levels"].(map[string]interface{}); ok {
-		for strLevel, element := range levelsSection {
-			if level, err := strconv.Atoi(strLevel); err == nil {
-				if elMap, ok := element.(map[string]interface{}); ok {
-					logLevel := &logLevelDesc{
-						Level:  level,
-						Stderr: false,
-					}
-					if stderr, exists := elMap["stderr_format"]; exists {
-						logLevel.Stderr = true
-						logLevel.Format = stderr.(string)
-					} else if stdout, exists := elMap["stdout_format"]; exists {
-						logLevel.Format = stdout.(string)
-					}
-					levelName := elMap["name"].(string)
-					logLevels[levelName] = logLevel
-					if len(lowestLevelName) > 0 && lowestLevelName[0] == levelName {
-						lowestLevel = level
-					}
-				}
-			}
-		}
-	}
+	lowestLevel := parseLogLevel(lowestLevelName[0])
+	partLogLevels := GetPartLogLevels()
 	return &Logger{
-		Dev:         dev.(logDevice),
-		Host:        host,
-		Source:      source,
-		DTFormat:    format,
-		DTFormatLen: formatLen,
-		LogLevels:   logLevels,
-		LowestLevel: lowestLevel,
+		Dev:           dev.(logDevice),
+		Host:          host,
+		Source:        source,
+		LowestLevel:   lowestLevel,
+		PartLogLevels: partLogLevels,
 	}
 }
 
-func (l *esLogger) Send(data string) {
-	if l.client == nil {
+func AwaitLoggers() {
+	wg.Wait()
+}
+
+// Verbose Very detailed logs
+func (l *Logger) Verbose(message interface{}) {
+	logLevel := logConfig.LogLevels["verbose"]
+	if !l.isCorrectLevel(*logLevel) {
 		return
 	}
-
-	_, err := l.client.Index(
-		l.index,
-		strings.NewReader(data),
-		l.client.Index.WithRefresh("true"),
-	)
-	if err != nil {
-		log.Println("failed to send log to ES: " + err.Error())
+	output := os.Stdout
+	if logLevel.Stderr {
+		output = os.Stderr
 	}
+	wg.Add(1)
+	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
 }
 
-func (l *esLogger) initEs(logger *Logger) error {
-	if l.proto == "" {
-		logger.Log("ElasticSearch protocol is not passed, initialising logger without ElasticSearch")
-		return nil
+// Log Important logs
+func (l *Logger) Log(message interface{}) {
+	logLevel := logConfig.LogLevels["log"]
+	if !l.isCorrectLevel(*logLevel) {
+		return
 	}
-
-	var err error
-	esConfig := elasticsearch.Config{
-		Addresses: []string{
-			l.proto + "://" + l.host + ":" + l.port,
-		},
+	output := os.Stdout
+	if logLevel.Stderr {
+		output = os.Stderr
 	}
-	l.client, err = elasticsearch.NewClient(esConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+	wg.Add(1)
+	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
 }
 
-func getSuitableDatetimeFormat(format string) (string, int) {
-	return strings.NewReplacer("YYYY", "2006", "MM", "01", "dd", "02", "HH", "15", "mm", "04", "ss", "05", "SSS", "999").Replace(format), utf8.RuneCountInString(format)
+// Warn Something may go wrong
+func (l *Logger) Warn(message interface{}) {
+	logLevel := logConfig.LogLevels["warn"]
+	if !l.isCorrectLevel(*logLevel) {
+		return
+	}
+	output := os.Stdout
+	if logLevel.Stderr {
+		output = os.Stderr
+	}
+	wg.Add(1)
+	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
 }
 
-func getLogs(url string) map[string]interface{} {
-	storage := make(map[string]interface{})
-	getJSON(url, &storage)
-	return storage
+// Failed to do something. This may cause problems!
+func (l *Logger) Error(message interface{}) {
+	logLevel := logConfig.LogLevels["error"]
+	if !l.isCorrectLevel(*logLevel) {
+		return
+	}
+	output := os.Stdout
+	if logLevel.Stderr {
+		output = os.Stderr
+	}
+	wg.Add(1)
+	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
+}
+
+// Critical error. Node's shut down!
+func (l *Logger) Critical(message interface{}) {
+	logLevel := logConfig.LogLevels["critical"]
+	if !l.isCorrectLevel(*logLevel) {
+		return
+	}
+	output := os.Stdout
+	if logLevel.Stderr {
+		output = os.Stderr
+	}
+	wg.Add(1)
+	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
 }
 
 func (l *Logger) baseWriter(message interface{}, output *os.File, template string, level int) {
 	defer wg.Done()
 	now := time.Now()
+
 	sendObj := &sendMessageFormat{
 		Source:    l.Source,
 		Host:      l.Host,
@@ -147,8 +123,8 @@ func (l *Logger) baseWriter(message interface{}, output *os.File, template strin
 		sendObj.Message = "Logger error: can't cast provided message to string or *APIError"
 	}
 
-	formattedTime := now.Format(l.DTFormat)
-	formattedTime += strings.Repeat("0", l.DTFormatLen-utf8.RuneCountInString(formattedTime))
+	formattedTime := now.Format(logConfig.DTFormat)
+	formattedTime += strings.Repeat("0", logConfig.DTFormatLen-utf8.RuneCountInString(formattedTime))
 	formattedMessage := sendObj.Message
 	if sendObj.Stack != nil {
 		formattedMessage += "\n" + sendObj.Stack.(string)
@@ -167,76 +143,26 @@ func (l *Logger) baseWriter(message interface{}, output *os.File, template strin
 	l.Dev.Send(string(r))
 }
 
-func AwaitLoggers() {
-	wg.Wait()
+func (l *Logger) isCorrectLevel(logLevel logLevelDesc) bool {
+	packageName, functionName := getCallerInfo(3)
+	pkgKey := toKey(packageName, "")
+	set, isCorrect := l.isCorrectLevelForKey(pkgKey, logLevel)
+	if set {
+		return isCorrect
+	}
+	pkgFuncKey := toKey(packageName, functionName)
+	set, isCorrect = l.isCorrectLevelForKey(pkgFuncKey, logLevel)
+	if set {
+		return isCorrect
+	}
+	return logLevel.Level >= l.LowestLevel
 }
 
-// Verbose Very detailed logs
-func (l *Logger) Verbose(message interface{}) {
-	logLevel := l.LogLevels["verbose"]
-	if l.LowestLevel > logLevel.Level {
-		return
+// IsCorrectLevelForKey returns 1. level is set, 2. level is correct
+func (l *Logger) isCorrectLevelForKey(key string, logLevel logLevelDesc) (bool, bool) {
+	level, exists := l.PartLogLevels[key]
+	if exists {
+		return true, logLevel.Level >= level
 	}
-	output := os.Stdout
-	if logLevel.Stderr {
-		output = os.Stderr
-	}
-	wg.Add(1)
-	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
-}
-
-// Log Important logs
-func (l *Logger) Log(message interface{}) {
-	logLevel := l.LogLevels["log"]
-	if l.LowestLevel > logLevel.Level {
-		return
-	}
-	output := os.Stdout
-	if logLevel.Stderr {
-		output = os.Stderr
-	}
-	wg.Add(1)
-	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
-}
-
-// Warn Something may go wrong
-func (l *Logger) Warn(message interface{}) {
-	logLevel := l.LogLevels["warn"]
-	if l.LowestLevel > logLevel.Level {
-		return
-	}
-	output := os.Stdout
-	if logLevel.Stderr {
-		output = os.Stderr
-	}
-	wg.Add(1)
-	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
-}
-
-// Failed to do something. This may cause problems!
-func (l *Logger) Error(message interface{}) {
-	logLevel := l.LogLevels["error"]
-	if l.LowestLevel > logLevel.Level {
-		return
-	}
-	output := os.Stdout
-	if logLevel.Stderr {
-		output = os.Stderr
-	}
-	wg.Add(1)
-	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
-}
-
-// Critical error. Node's shut down!
-func (l *Logger) Critical(message interface{}) {
-	logLevel := l.LogLevels["critical"]
-	if l.LowestLevel > logLevel.Level {
-		return
-	}
-	output := os.Stdout
-	if logLevel.Stderr {
-		output = os.Stderr
-	}
-	wg.Add(1)
-	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
+	return false, false
 }

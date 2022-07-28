@@ -31,11 +31,15 @@ type logLevelDesc struct {
 }
 
 type Logger struct {
-	Dev         logDevice
-	Host        string
-	Source      string
+	Dev           logDevice
+	Host          string
+	Source        string
+	LowestLevel   int
+	PartLogLevels map[string]int
+}
+
+type logConfiguration struct {
+	LogLevels   map[string]*logLevelDesc
 	DTFormat    string
 	DTFormatLen int
-	LogLevels   map[string]*logLevelDesc
-	LowestLevel int
 }
