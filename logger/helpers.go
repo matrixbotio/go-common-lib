@@ -13,11 +13,10 @@ import (
 	"unicode/utf8"
 )
 
-func getJSON(url string, storage interface{}) {
+func getJSON(url string, storage interface{}) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Panicln("Unable to download errors JSON file: " + url)
-		return
+		return err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -27,14 +26,13 @@ func getJSON(url string, storage interface{}) {
 	}(resp.Body)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Panicln("Exception while reading errors JSON body: " + err.Error())
-		return
+		return err
 	}
 	err = json.Unmarshal(body, storage)
 	if err != nil {
-		log.Panicln("Exception while unmarshalling errors JSON body: " + err.Error())
-		return
+		return err
 	}
+	return nil
 }
 
 func getCallerInfo(skip int) (string, string) {
@@ -74,7 +72,10 @@ func getSuitableDatetimeFormat(format string) (string, int) {
 
 func getLogConfig(url string) logConfiguration {
 	logConfig := make(map[string]interface{})
-	getJSON(url, &logConfig)
+	err := getJSON(url, &logConfig)
+	if err != nil {
+		log.Panicln("Exception while getting log config: " + err.Error())
+	}
 	dtFormat, dtFormatLen := getSuitableDatetimeFormat(logConfig["datetime_format"].(string))
 	logLevels := make(map[string]*logLevelDesc)
 	if levelsSection, ok := logConfig["levels"].(map[string]interface{}); ok {
@@ -106,10 +107,11 @@ func getLogConfig(url string) logConfiguration {
 
 func GetPartLogLevels() map[string]int {
 	partLogLevels := make(map[string]int)
+	const logLevelPrefix = "LOG_LEVEL_"
 	for _, entry := range os.Environ() {
-		if strings.HasPrefix(entry, "LOG_LEVEL_") {
+		if strings.HasPrefix(entry, logLevelPrefix) {
 			entryParts := strings.Split(entry, "=")
-			key := strings.ToLower(strings.TrimPrefix(entryParts[0], "LOG_LEVEL_"))
+			key := strings.ToLower(strings.TrimPrefix(entryParts[0], logLevelPrefix))
 			value := strings.TrimSpace(entryParts[1])
 			partLogLevels[key] = parseLogLevel(value)
 		}
