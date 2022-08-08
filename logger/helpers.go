@@ -48,7 +48,7 @@ func getCallerInfo(skip int) (string, string) {
 			nameParts := strings.Split(name, ".")
 			packageName := nameParts[0]
 			functionName := nameParts[len(nameParts)-1]
-			return packageName, functionName
+			return strings.ReplaceAll(packageName, "-", ""), functionName
 		}
 	}
 	return "", ""
