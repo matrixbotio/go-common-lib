@@ -18,6 +18,7 @@ const (
 	timeKey       = "timestamp"
 	messageKey    = "message"
 	stacktraceKey = "stack"
+	levelTextKey  = "level_text"
 )
 
 const (
@@ -56,20 +57,22 @@ func InitGlobalLogger(isDebug bool) (*Logger, error) {
 		lgrCfg.TimeKey = timeKey
 		lgrCfg.MessageKey = messageKey
 		lgrCfg.StacktraceKey = stacktraceKey
+		lgrCfg.LevelKey = levelTextKey
 
 		lgrCores = []zapcore.Core{
-			zapcore.NewCore(zapcore.NewConsoleEncoder(lgrCfg), os.Stdout, zapcore.DebugLevel),
+			zapcore.NewCore(&encoder{zapcore.NewConsoleEncoder(lgrCfg)}, os.Stdout, zapcore.DebugLevel),
 		}
 	} else {
 		lgrCfg := zap.NewProductionEncoderConfig()
 		lgrCfg.TimeKey = timeKey
 		lgrCfg.MessageKey = messageKey
 		lgrCfg.StacktraceKey = stacktraceKey
+		lgrCfg.LevelKey = levelTextKey
 		lgrCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 
 		lgrCores = []zapcore.Core{
-			zapcore.NewCore(zapcore.NewJSONEncoder(lgrCfg), os.Stdout, zapcore.InfoLevel),
-			zapcore.NewCore(zapcore.NewJSONEncoder(lgrCfg), &ws, zapcore.InfoLevel),
+			zapcore.NewCore(&encoder{zapcore.NewJSONEncoder(lgrCfg)}, os.Stdout, zapcore.InfoLevel),
+			zapcore.NewCore(&encoder{zapcore.NewJSONEncoder(lgrCfg)}, &ws, zapcore.InfoLevel),
 		}
 	}
 
