@@ -2,13 +2,14 @@ package logger
 
 import (
 	"encoding/json"
-	"github.com/matrixbotio/constants-lib"
 	"log"
 	"os"
 	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/matrixbotio/constants-lib"
 )
 
 var wg sync.WaitGroup
@@ -33,7 +34,8 @@ func AwaitLoggers() {
 // Verbose Very detailed logs
 func (l *Logger) Verbose(message interface{}) {
 	logLevel := logConfig.LogLevels["verbose"]
-	if !l.isCorrectLevel(*logLevel) {
+	pkgName, isLevelCorrect := l.isCorrectLevel(*logLevel)
+	if !isLevelCorrect {
 		return
 	}
 	output := os.Stdout
@@ -41,13 +43,20 @@ func (l *Logger) Verbose(message interface{}) {
 		output = os.Stderr
 	}
 	wg.Add(1)
+
+	msgStr, isMessageStr := message.(string)
+	if isMessageStr {
+		message = msgStr + ". package name: " + pkgName
+	}
+
 	go l.baseWriter(message, output, logLevel.Format, logLevel.Level)
 }
 
 // Log Important logs
 func (l *Logger) Log(message interface{}) {
 	logLevel := logConfig.LogLevels["log"]
-	if !l.isCorrectLevel(*logLevel) {
+	_, isLevelCorrect := l.isCorrectLevel(*logLevel)
+	if !isLevelCorrect {
 		return
 	}
 	output := os.Stdout
@@ -61,7 +70,8 @@ func (l *Logger) Log(message interface{}) {
 // Warn Something may go wrong
 func (l *Logger) Warn(message interface{}) {
 	logLevel := logConfig.LogLevels["warn"]
-	if !l.isCorrectLevel(*logLevel) {
+	_, isLevelCorrect := l.isCorrectLevel(*logLevel)
+	if !isLevelCorrect {
 		return
 	}
 	output := os.Stdout
@@ -75,7 +85,8 @@ func (l *Logger) Warn(message interface{}) {
 // Failed to do something. This may cause problems!
 func (l *Logger) Error(message interface{}) {
 	logLevel := logConfig.LogLevels["error"]
-	if !l.isCorrectLevel(*logLevel) {
+	_, isLevelCorrect := l.isCorrectLevel(*logLevel)
+	if !isLevelCorrect {
 		return
 	}
 	output := os.Stdout
@@ -89,7 +100,8 @@ func (l *Logger) Error(message interface{}) {
 // Critical error. Node's shut down!
 func (l *Logger) Critical(message interface{}) {
 	logLevel := logConfig.LogLevels["critical"]
-	if !l.isCorrectLevel(*logLevel) {
+	_, isLevelCorrect := l.isCorrectLevel(*logLevel)
+	if !isLevelCorrect {
 		return
 	}
 	output := os.Stdout
@@ -143,19 +155,19 @@ func (l *Logger) baseWriter(message interface{}, output *os.File, template strin
 	l.Dev.Send(string(r))
 }
 
-func (l *Logger) isCorrectLevel(logLevel logLevelDesc) bool {
+func (l *Logger) isCorrectLevel(logLevel logLevelDesc) (string, bool) {
 	packageName, functionName := getCallerInfo(3)
 	pkgKey := toKey(packageName, "")
 	set, isCorrect := l.isCorrectLevelForKey(pkgKey, logLevel)
 	if set {
-		return isCorrect
+		return pkgKey, isCorrect
 	}
 	pkgFuncKey := toKey(packageName, functionName)
 	set, isCorrect = l.isCorrectLevelForKey(pkgFuncKey, logLevel)
 	if set {
-		return isCorrect
+		return pkgKey, isCorrect
 	}
-	return logLevel.Level >= l.LowestLevel
+	return pkgKey, logLevel.Level >= l.LowestLevel
 }
 
 // IsCorrectLevelForKey returns 1. level is set, 2. level is correct
