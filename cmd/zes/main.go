@@ -13,10 +13,11 @@ import (
 	"github.com/matrixbotio/go-common-lib/zes"
 )
 
-const isDebug = false
+const isDebug = true
+const writeToES = true
 
 func main() {
-	logger, err := zes.InitGlobalLogger(isDebug)
+	logger, err := zes.InitGlobalLogger(isDebug, writeToES)
 	if err != nil {
 		panic(err)
 	}

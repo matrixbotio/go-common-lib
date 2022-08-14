@@ -15,13 +15,6 @@ import (
 )
 
 const (
-	timeKey       = "timestamp"
-	messageKey    = "message"
-	stacktraceKey = "stack"
-	levelTextKey  = "level_text"
-)
-
-const (
 	esBufSize       = 5 * 1024 // 5 kB
 	esFlushInterval = 10 * time.Second
 )
@@ -31,7 +24,7 @@ type Logger struct {
 	pipeReader  *io.PipeReader
 }
 
-func InitGlobalLogger(isDebug bool) (*Logger, error) {
+func InitGlobalLogger(isDebug, writeToES bool) (*Logger, error) {
 	elastic, err := logger.InitESLogger(
 		"",
 		"",
@@ -51,28 +44,46 @@ func InitGlobalLogger(isDebug bool) (*Logger, error) {
 		FlushInterval: esFlushInterval,
 	}
 
-	var lgrCores []zapcore.Core
+	lgrCores := make([]zapcore.Core, 0)
 	if isDebug {
-		lgrCfg := zap.NewDevelopmentEncoderConfig()
-		lgrCfg.TimeKey = timeKey
-		lgrCfg.MessageKey = messageKey
-		lgrCfg.StacktraceKey = stacktraceKey
-		lgrCfg.LevelKey = levelTextKey
+		lgrCores = append(
+			lgrCores,
+			zapcore.NewCore(
+				&encoder{zapcore.NewConsoleEncoder(newConsoleConfig())},
+				os.Stdout,
+				zapcore.DebugLevel,
+			),
+		)
 
-		lgrCores = []zapcore.Core{
-			zapcore.NewCore(&encoder{zapcore.NewConsoleEncoder(lgrCfg)}, os.Stdout, zapcore.DebugLevel),
+		if writeToES {
+			lgrCores = append(
+				lgrCores,
+				zapcore.NewCore(
+					&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
+					&ws,
+					zapcore.DebugLevel,
+				),
+			)
 		}
 	} else {
-		lgrCfg := zap.NewProductionEncoderConfig()
-		lgrCfg.TimeKey = timeKey
-		lgrCfg.MessageKey = messageKey
-		lgrCfg.StacktraceKey = stacktraceKey
-		lgrCfg.LevelKey = levelTextKey
-		lgrCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+		lgrCores = append(
+			lgrCores,
+			zapcore.NewCore(
+				&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
+				os.Stdout,
+				zapcore.InfoLevel,
+			),
+		)
 
-		lgrCores = []zapcore.Core{
-			zapcore.NewCore(&encoder{zapcore.NewJSONEncoder(lgrCfg)}, os.Stdout, zapcore.InfoLevel),
-			zapcore.NewCore(&encoder{zapcore.NewJSONEncoder(lgrCfg)}, &ws, zapcore.InfoLevel),
+		if writeToES {
+			lgrCores = append(
+				lgrCores,
+				zapcore.NewCore(
+					&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
+					&ws,
+					zapcore.InfoLevel,
+				),
+			)
 		}
 	}
 
