@@ -20,11 +20,13 @@ const (
 )
 
 type Logger struct {
-	readerError chan error
-	pipeReader  *io.PipeReader
+	readerError            chan error
+	pipeReader             *io.PipeReader
+	logger                 *zap.Logger
+	commonAdditionalFields []zap.Field
 }
 
-func InitGlobalLogger(isDebug, writeToES bool) (*Logger, error) {
+func Init(writeToES bool, commonAdditionalFields ...zap.Field) (*Logger, error) {
 	elastic, err := logger.InitESLogger(
 		"",
 		"",
@@ -44,47 +46,27 @@ func InitGlobalLogger(isDebug, writeToES bool) (*Logger, error) {
 		FlushInterval: esFlushInterval,
 	}
 
-	lgrCores := make([]zapcore.Core, 0)
-	if isDebug {
+	lgrCores := []zapcore.Core{
+		zapcore.NewCore(
+			newEncoder(func() zapcore.Encoder {
+				return zapcore.NewConsoleEncoder(newConsoleConfig())
+			}),
+			os.Stdout,
+			zapcore.DebugLevel,
+		),
+	}
+
+	if writeToES {
 		lgrCores = append(
 			lgrCores,
 			zapcore.NewCore(
-				&encoder{zapcore.NewConsoleEncoder(newConsoleConfig())},
-				os.Stdout,
+				newEncoder(func() zapcore.Encoder {
+					return zapcore.NewJSONEncoder(newJsonConfig())
+				}),
+				&ws,
 				zapcore.DebugLevel,
 			),
 		)
-
-		if writeToES {
-			lgrCores = append(
-				lgrCores,
-				zapcore.NewCore(
-					&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
-					&ws,
-					zapcore.DebugLevel,
-				),
-			)
-		}
-	} else {
-		lgrCores = append(
-			lgrCores,
-			zapcore.NewCore(
-				&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
-				os.Stdout,
-				zapcore.InfoLevel,
-			),
-		)
-
-		if writeToES {
-			lgrCores = append(
-				lgrCores,
-				zapcore.NewCore(
-					&encoder{zapcore.NewJSONEncoder(newJsonConfig())},
-					&ws,
-					zapcore.InfoLevel,
-				),
-			)
-		}
 	}
 
 	lgr := zap.New(
@@ -92,8 +74,6 @@ func InitGlobalLogger(isDebug, writeToES bool) (*Logger, error) {
 		zap.AddCaller(),
 		zap.AddStacktrace(zapcore.ErrorLevel),
 	)
-
-	zap.ReplaceGlobals(lgr)
 
 	readerError := make(chan error, 1)
 
@@ -111,14 +91,34 @@ func InitGlobalLogger(isDebug, writeToES bool) (*Logger, error) {
 	}()
 
 	return &Logger{
-		readerError: readerError,
-		pipeReader:  pipeReader,
+		readerError:            readerError,
+		pipeReader:             pipeReader,
+		logger:                 lgr,
+		commonAdditionalFields: commonAdditionalFields,
 	}, nil
 }
 
 func (l *Logger) Close() error {
-	zap.L().Sync()
+	l.logger.Sync()
 	l.pipeReader.Close()
 
 	return <-l.readerError
+}
+
+func (l *Logger) New(level zapcore.Level, additionalFields ...zap.Field) *zap.Logger {
+	if l.logger == nil {
+		panic("must be initialized at first")
+	}
+
+	wrap := func(c zapcore.Core) zapcore.Core {
+		n, err := zapcore.NewIncreaseLevelCore(c, level)
+		if err != nil {
+			panic("should never happen")
+		}
+		return n
+	}
+
+	return l.logger.
+		WithOptions(zap.WrapCore(wrap)).
+		With(append(l.commonAdditionalFields, additionalFields...)...)
 }

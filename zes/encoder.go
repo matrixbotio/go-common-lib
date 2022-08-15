@@ -12,6 +12,14 @@ const (
 
 type encoder struct {
 	zapcore.Encoder
+	f func() zapcore.Encoder
+}
+
+func newEncoder(f func() zapcore.Encoder) *encoder {
+	return &encoder{
+		Encoder: f(),
+		f:       f,
+	}
 }
 
 func (e *encoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
@@ -31,4 +39,8 @@ func (e *encoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*buf
 	}
 
 	return e.Encoder.EncodeEntry(entry, append(fields, zap.Int(levelKey, level)))
+}
+
+func (e *encoder) Clone() zapcore.Encoder {
+	return newEncoder(e.f)
 }
