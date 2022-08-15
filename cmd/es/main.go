@@ -1,8 +1,9 @@
 package main
 
 import (
-	cmnLogger "github.com/matrixbotio/go-common-lib/logger"
 	"os"
+
+	cmnLogger "github.com/matrixbotio/go-common-lib/logger"
 )
 
 func main() {
