@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/matrixbotio/go-common-lib/zes"
+	"github.com/matrixbotio/go-common-lib/pkg/zes"
 )
 
 const writeToES = false

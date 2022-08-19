@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/matrixbotio/go-common-lib/logger"
+	"github.com/matrixbotio/go-common-lib/internal/logger"
 )
 
 const (

@@ -1,10 +1,11 @@
 package logger
 
 import (
-	"github.com/elastic/go-elasticsearch/v7"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/elastic/go-elasticsearch/v7"
 )
 
 func InitESLogger(sourceName string, logLevel string, esProto string, esHost string, esPort string,

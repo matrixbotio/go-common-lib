@@ -9,7 +9,7 @@ import (
 
 	"github.com/matrixbotio/go-common-lib/cmd/zes/huge-example/pgk/service1and2"
 	"github.com/matrixbotio/go-common-lib/cmd/zes/huge-example/pgk/service3"
-	"github.com/matrixbotio/go-common-lib/zes"
+	"github.com/matrixbotio/go-common-lib/pkg/zes"
 )
 
 const writeToES = false
