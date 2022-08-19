@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	cmnLogger "github.com/matrixbotio/go-common-lib/logger"
+	cmnLogger "github.com/matrixbotio/go-common-lib/internal/logger"
 )
 
 func main() {

@@ -2,13 +2,14 @@ package logger
 
 import (
 	"encoding/json"
-	"github.com/matrixbotio/constants-lib"
 	"log"
 	"os"
 	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/matrixbotio/constants-lib"
 )
 
 var wg sync.WaitGroup
