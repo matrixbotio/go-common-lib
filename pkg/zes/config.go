@@ -18,6 +18,7 @@ func newConsoleConfig() zapcore.EncoderConfig {
 	cfg.MessageKey = messageKey
 	cfg.StacktraceKey = stacktraceKey
 	cfg.LevelKey = levelTextKey
+	cfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
 
 	return cfg
 }
@@ -28,7 +29,7 @@ func newJsonConfig() zapcore.EncoderConfig {
 	cfg.MessageKey = messageKey
 	cfg.StacktraceKey = stacktraceKey
 	cfg.LevelKey = levelTextKey
-	cfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
 
 	return cfg
 }
