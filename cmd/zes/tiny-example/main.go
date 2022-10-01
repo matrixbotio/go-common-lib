@@ -66,7 +66,9 @@ func main() {
 
 	writeError(debugLgr)
 
-	debugLgr.Info("Application stopped")
+	debugLgr.Info("Application going to be stopped")
+
+	debugLgr.Fatal("OOOOPS fatal", zap.Error(errors.New("fataaaaal")))
 }
 
 func writeError(logger *zap.Logger) {
