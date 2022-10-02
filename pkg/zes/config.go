@@ -19,6 +19,7 @@ func newConsoleConfig() zapcore.EncoderConfig {
 	cfg.StacktraceKey = stacktraceKey
 	cfg.LevelKey = levelTextKey
 	cfg.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+	cfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
 
 	return cfg
 }
