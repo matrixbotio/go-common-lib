@@ -32,17 +32,19 @@ func TestGetDBConfig(t *testing.T) {
 				User:          "usr",
 				Password:      "psw",
 				ConnTimeoutMS: 5000,
+				MaxOpenConns:  10,
 			},
 		},
 		{
 			name: "Set",
 			envs: map[string]string{
-				"DB_HOST":         "hst1",
-				"DB_PORT":         "567",
-				"DB_NAME":         "nm2",
-				"DB_USER":         "usr3",
-				"DB_PASSWORD":     "psw4",
-				"DB_CONN_TIMEOUT": "678",
+				"DB_HOST":           "hst1",
+				"DB_PORT":           "567",
+				"DB_NAME":           "nm2",
+				"DB_USER":           "usr3",
+				"DB_PASSWORD":       "psw4",
+				"DB_CONN_TIMEOUT":   "678",
+				"DB_MAX_OPEN_CONNS": "5",
 			},
 			expected: config.DB{
 				Host:          "hst1",
@@ -51,6 +53,7 @@ func TestGetDBConfig(t *testing.T) {
 				User:          "usr3",
 				Password:      "psw4",
 				ConnTimeoutMS: 678,
+				MaxOpenConns:  5,
 			},
 		},
 		{

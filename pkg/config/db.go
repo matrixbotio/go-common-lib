@@ -13,6 +13,7 @@ type DB struct {
 	User          string `envconfig:"DB_USER"`
 	Password      string `envconfig:"DB_PASSWORD"`
 	ConnTimeoutMS int    `envconfig:"DB_CONN_TIMEOUT" default:"5000"`
+	MaxOpenConns  int    `envconfig:"DB_MAX_OPEN_CONNS" default:"10"`
 }
 
 func (db DB) GetDSN() string {
