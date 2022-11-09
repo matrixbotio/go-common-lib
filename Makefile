@@ -1,3 +1,4 @@
-.PHONY: tests
-tests:
-	go test -race --count 1 ./...
+.PHONY: unit-tests
+unit-tests:
+	go test -race -short -v --count 1 ./...
+
