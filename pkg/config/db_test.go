@@ -49,6 +49,7 @@ func TestGetDBConfig(t *testing.T) {
 				"DB_MAX_OPEN_CONNS":         "786",
 				"DB_MAX_IDLE_CONNS":         "123",
 				"DB_CONN_MAX_LIFETIME_MINS": "456",
+				"DB_GORM_DEBUG_MODE":        "true",
 			},
 			expected: config.DB{
 				Host:                "hst1",
@@ -60,6 +61,7 @@ func TestGetDBConfig(t *testing.T) {
 				MaxOpenConns:        786,
 				MaxIdleConns:        123,
 				ConnMaxLifetimeMins: 456,
+				GormDebugMode:       true,
 			},
 		},
 		{
