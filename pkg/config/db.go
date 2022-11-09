@@ -17,6 +17,8 @@ type DB struct {
 	MaxOpenConns        int `envconfig:"DB_MAX_OPEN_CONNS" default:"10"`
 	MaxIdleConns        int `envconfig:"DB_MAX_IDLE_CONNS" default:"5"`
 	ConnMaxLifetimeMins int `envconfig:"DB_CONN_MAX_LIFETIME_MINS" default:"5"`
+
+	GormDebugMode bool `envconfig:"DB_GORM_DEBUG_MODE" default:"false"`
 }
 
 func (db DB) GetDSN() string {
