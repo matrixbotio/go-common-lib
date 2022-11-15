@@ -106,5 +106,5 @@ func TestDB_GetDSN(t *testing.T) {
 	}
 
 	dsn := c.GetDSN()
-	assert.Equal(t, "us:ps@tcp(hst:45)/nm?timeout=67ms", dsn)
+	assert.Equal(t, "us:ps@tcp(hst:45)/nm?timeout=67ms&parseTime=true", dsn)
 }

@@ -23,7 +23,7 @@ type DB struct {
 
 func (db DB) GetDSN() string {
 	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?timeout=%dms",
+		"%s:%s@tcp(%s:%d)/%s?timeout=%dms&parseTime=true",
 		db.User, db.Password, db.Host, db.Port, db.Name, db.ConnTimeoutMS,
 	)
 }
