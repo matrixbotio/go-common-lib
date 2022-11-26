@@ -6,9 +6,9 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-const metadataKey = "cstx-id"
+const metadataKey = "cstx-serialized"
 
-func GetCstxIDFromGrpcMetadata(ctx context.Context) string {
+func GetSerializedCstxFromGrpcMetadata(ctx context.Context) string {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		val := md[metadataKey]
 		if len(val) > 0 {
@@ -18,6 +18,6 @@ func GetCstxIDFromGrpcMetadata(ctx context.Context) string {
 	return ""
 }
 
-func AddCstxIDToGrpcMetadata(ctx context.Context, cstxID string) context.Context {
-	return metadata.AppendToOutgoingContext(ctx, metadataKey, cstxID)
+func AddSerializedCstxToGrpcMetadata(ctx context.Context, cstx string) context.Context {
+	return metadata.AppendToOutgoingContext(ctx, metadataKey, cstx)
 }
