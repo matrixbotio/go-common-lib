@@ -7,11 +7,12 @@ import (
 )
 
 type RMQ struct {
-	UseTLS   bool   `envconfig:"AMQP_USE_TLS" default:"false"`
-	Host     string `envconfig:"AMQP_HOST" default:"localhost"`
-	Port     int    `envconfig:"AMQP_PORT" default:"5672"`
-	User     string `envconfig:"AMQP_USER"`
-	Password string `envconfig:"AMQP_PASSWORD"`
+	UseTLS         bool   `envconfig:"AMQP_USE_TLS" default:"false"`
+	Host           string `envconfig:"AMQP_HOST" default:"localhost"`
+	Port           int    `envconfig:"AMQP_PORT" default:"5672"`
+	User           string `envconfig:"AMQP_USER"`
+	Password       string `envconfig:"AMQP_PASSWORD"`
+	ExchangePrefix string `envconfig:"AMQP_EXCHANGES_PREFIX"`
 }
 
 func GetRMQConfig() (RMQ, error) {
