@@ -71,14 +71,18 @@ func getSuitableDatetimeFormat(format string) (string, int) {
 }
 
 func getLogConfig(url string) logConfiguration {
-	logConfig := make(map[string]interface{})
-	err := getJSON(url, &logConfig)
-	if err != nil {
+	cfgRaw := make(map[string]interface{})
+	if err := getJSON(url, &cfgRaw); err != nil {
 		log.Panicln("Exception while getting log config: " + err.Error())
 	}
-	dtFormat, dtFormatLen := getSuitableDatetimeFormat(logConfig["datetime_format"].(string))
+
+	return parseLogConfig(cfgRaw)
+}
+
+func parseLogConfig(cfgRaw map[string]interface{}) logConfiguration {
+	dtFormat, dtFormatLen := getSuitableDatetimeFormat(cfgRaw["datetime_format"].(string))
 	logLevels := make(map[string]*logLevelDesc)
-	if levelsSection, ok := logConfig["levels"].(map[string]interface{}); ok {
+	if levelsSection, ok := cfgRaw["levels"].(map[string]interface{}); ok {
 		for strLevel, element := range levelsSection {
 			if level, err := strconv.Atoi(strLevel); err == nil {
 				if elMap, ok := element.(map[string]interface{}); ok {
