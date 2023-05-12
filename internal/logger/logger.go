@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/matrixbotio/constants-lib"
 )
@@ -125,7 +124,6 @@ func (l *Logger) baseWriter(message interface{}, output *os.File, template strin
 	}
 
 	formattedTime := now.Format(logConfig.DTFormat)
-	formattedTime += strings.Repeat("0", logConfig.DTFormatLen-utf8.RuneCountInString(formattedTime))
 	formattedMessage := sendObj.Message
 	if sendObj.Stack != nil {
 		formattedMessage += "\n" + sendObj.Stack.(string)
