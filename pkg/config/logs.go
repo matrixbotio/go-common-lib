@@ -40,6 +40,12 @@ func GetLogsConfig() (Logs, error) {
 			zapLevel = zapcore.InfoLevel
 		case "verbose":
 			zapLevel = zapcore.DebugLevel
+		case "warn":
+			zapLevel = zapcore.WarnLevel
+		case "error":
+			zapLevel = zapcore.ErrorLevel
+		case "critical":
+			zapLevel = zapcore.FatalLevel
 		default:
 			return Logs{}, LogLevelIncorrectError{
 				Level: val,
