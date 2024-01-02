@@ -9,7 +9,9 @@ import (
 )
 
 type Logs struct {
-	LogToES bool
+	LogToES            bool
+	SamplingInitial    int
+	SamplingThereafter int
 
 	AppLevel          zapcore.Level
 	RMQWorkerLibLevel zapcore.Level
@@ -17,7 +19,9 @@ type Logs struct {
 
 func GetLogsConfig() (Logs, error) {
 	var Parsed struct {
-		LogToES bool `envconfig:"LOG_TO_ES" default:"true"`
+		LogToES            bool `envconfig:"LOG_TO_ES" default:"true"`
+		SamplingInitial    int  `envconfig:"LOG_SAMPLING_INITIAL" default:"300"`
+		SamplingThereafter int  `envconfig:"LOG_SAMPLING_THEREAFTER" default:"100"`
 
 		AppLevel          string `envconfig:"LOG_LEVEL" default:"log"`
 		RMQWorkerLibLevel string `envconfig:"LOG_LEVEL_RMQWORKERLIB" default:"log"`
@@ -28,7 +32,9 @@ func GetLogsConfig() (Logs, error) {
 	}
 
 	cfg := Logs{
-		LogToES: Parsed.LogToES,
+		LogToES:            Parsed.LogToES,
+		SamplingInitial:    Parsed.SamplingInitial,
+		SamplingThereafter: Parsed.SamplingThereafter,
 	}
 
 	for _, field := range []string{"AppLevel", "RMQWorkerLibLevel"} {

@@ -21,9 +21,11 @@ func TestGetLogsConfig(t *testing.T) {
 		{
 			name: "Not set",
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -32,9 +34,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "true",
 			},
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -43,9 +47,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "false",
 			},
 			expected: config.Logs{
-				LogToES:           false,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            false,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -54,9 +60,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "f",
 			},
 			expected: config.Logs{
-				LogToES:           false,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            false,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -65,9 +73,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "0",
 			},
 			expected: config.Logs{
-				LogToES:           false,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            false,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -76,9 +86,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "t",
 			},
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -87,9 +99,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_TO_ES": "1",
 			},
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -99,9 +113,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_LEVEL_RMQWORKERLIB": "log",
 			},
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.InfoLevel,
-				RMQWorkerLibLevel: zapcore.InfoLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.InfoLevel,
+				RMQWorkerLibLevel:  zapcore.InfoLevel,
 			},
 		},
 		{
@@ -111,9 +127,11 @@ func TestGetLogsConfig(t *testing.T) {
 				"LOG_LEVEL_RMQWORKERLIB": "verbose",
 			},
 			expected: config.Logs{
-				LogToES:           true,
-				AppLevel:          zapcore.DebugLevel,
-				RMQWorkerLibLevel: zapcore.DebugLevel,
+				LogToES:            true,
+				SamplingInitial:    300,
+				SamplingThereafter: 100,
+				AppLevel:           zapcore.DebugLevel,
+				RMQWorkerLibLevel:  zapcore.DebugLevel,
 			},
 		},
 		{
