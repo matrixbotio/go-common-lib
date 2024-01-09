@@ -1,6 +1,6 @@
 module github.com/matrixbotio/go-common-lib
 
-go 1.17
+go 1.21
 
 require (
 	github.com/elastic/go-elasticsearch/v7 v7.13.1
@@ -8,7 +8,7 @@ require (
 	github.com/matrixbotio/constants-lib v1.0.87
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.22.0
-	google.golang.org/grpc v1.56.3
+	google.golang.org/grpc v1.54.0
 )
 
 require (
