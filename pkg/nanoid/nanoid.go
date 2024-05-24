@@ -1,4 +1,4 @@
-package genid
+package nano
 
 import (
 	"fmt"
