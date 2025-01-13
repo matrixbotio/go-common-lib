@@ -30,4 +30,5 @@ func TestIDInvalidLength(t *testing.T) {
 
 	// then
 	assert.NotEmpty(t, result)
+	assert.Len(t, result, 11)
 }
