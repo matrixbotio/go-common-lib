@@ -17,6 +17,7 @@ type Logs struct {
 	RMQWorkerLibLevel zapcore.Level
 }
 
+// Logs config v1
 func GetLogsConfig() (Logs, error) {
 	var Parsed struct {
 		LogToES            bool `envconfig:"LOG_TO_ES" default:"true"`
