@@ -25,6 +25,10 @@ type LogsConfig struct {
 }
 
 func getZapLogLevel(val LogLevel) zapcore.Level {
+	if val == "" {
+		return zapcore.DebugLevel
+	}
+
 	switch val {
 	case LogLevelInfo:
 		return zapcore.InfoLevel
@@ -37,7 +41,7 @@ func getZapLogLevel(val LogLevel) zapcore.Level {
 	case LogLevelFatal:
 		return zapcore.FatalLevel
 	default:
-		fmt.Printf("ivalid log level: %q\n", val)
+		fmt.Printf("invalid log level: %q\n", val)
 		return zapcore.DebugLevel
 	}
 }
