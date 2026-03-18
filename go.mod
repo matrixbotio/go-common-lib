@@ -1,6 +1,6 @@
 module github.com/matrixbotio/go-common-lib
 
-go 1.21
+go 1.24.0
 
 require (
 	github.com/elastic/go-elasticsearch/v7 v7.13.1
@@ -10,20 +10,19 @@ require (
 	github.com/matrixbotio/constants-lib v1.0.87
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.22.0
-	google.golang.org/grpc v1.56.3
+	google.golang.org/grpc v1.79.3
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
